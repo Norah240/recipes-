@@ -7,7 +7,13 @@
 import SwiftUI
 import PhotosUI
 
-// Ingredient Model
+struct Recipe: Identifiable {
+    let id = UUID()
+    let title: String
+    let description: String
+    let ingredients: [Ingredient]
+}
+
 struct Ingredient: Identifiable {
     let id = UUID()
     var name: String
@@ -60,7 +66,7 @@ struct IngredientPopup: View {
                         Text("🥛 Cup")
                             .padding()
                             .frame(maxWidth: .infinity)
-                            .background(measurement == "🥛 Cup" ? Color.colorOrange2 : Color.gray)
+                            .background(measurement == "🥛 Cup" ? Color.colorOrange2: Color.gray)
                             .cornerRadius(8)
                             .foregroundColor(.white)
                     }
@@ -172,13 +178,15 @@ struct ImagePicker: UIViewControllerRepresentable {
 
 // NewRecipeView for creating new recipes
 struct NewRecipeView: View {
-    @Environment(\.presentationMode) var presentationMode // Used for dismissing the view
+    @Environment(\.presentationMode) var presentationMode
     @State private var showImagePicker = false
     @State private var selectedImage: UIImage?
     @State private var recipeTitle: String = ""
     @State private var recipeDescription: String = ""
     @State private var showIngredientPopup = false
     @State private var ingredients: [Ingredient] = []
+    
+    var onSave: (Recipe) -> Void // Closure for saving the recipe
 
     var body: some View {
         ZStack {
@@ -199,9 +207,9 @@ struct NewRecipeView: View {
                                 Image(systemName: "photo.badge.plus")
                                     .resizable()
                                     .frame(width: 80, height: 80)
-                                    .foregroundColor(Color(red: 0.985, green: 0.379, blue: 0.072))
+                                    .foregroundColor(Color("ColorOrange2"))
                                 Text("Upload Photo")
-                                    .foregroundColor(Color(red: 0.985, green: 0.379, blue: 0.072))
+                                    .foregroundColor(Color("ColorOrange2"))
                                     .font(.headline)
                             }
                             .padding(.top, 90.0)
@@ -252,7 +260,7 @@ struct NewRecipeView: View {
                             showIngredientPopup = true
                         }) {
                             Image(systemName: "plus")
-                                .foregroundColor(.orange)
+                                .foregroundColor(Color("ColorOrange2"))
                                 .font(.title)
                         }
                     }
@@ -262,16 +270,36 @@ struct NewRecipeView: View {
                     List {
                         ForEach(ingredients) { ingredient in
                             HStack {
+                                // Serving amount on the left, styled in orange
+                                Text("\(ingredient.serving)")
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(Color("ColorOrange2"))
+                                    .padding(.leading, 8)
+
+                                // Ingredient name styled in white
                                 Text(ingredient.name)
+                                    .font(.system(size: 18, weight: .bold))
+                                    .foregroundColor(Color("ColorOrange2"))
+                                    .padding(.leading, 8)
+
                                 Spacer()
-                                Text("\(ingredient.serving) \(ingredient.measurement)(s)")
+
+                                // Measurement with orange background
+                                Text(ingredient.measurement)
+                                    .font(.system(size: 16, weight: .bold))
+                                    .foregroundColor(Color.white)
+                                    .padding(.horizontal, 10)
+                                    .padding(.vertical, 5)
+                                    .background(Color("ColorOrange2"))
+                                    .cornerRadius(8)
                             }
-                            .foregroundColor(.white)
+                            .padding(.vertical, 5) // Space out rows
+                            .background(Color.gray.opacity(0.2)) // Gray background for the entire row
+                            .cornerRadius(10) // Rounded corners for the row
                         }
                     }
                     .listStyle(PlainListStyle())
                     .frame(height: 200)
-
                     Spacer()
                 }
                 .padding()
@@ -279,13 +307,15 @@ struct NewRecipeView: View {
                 .navigationBarTitle("New Recipe", displayMode: .large)
                 .navigationBarItems(
                     leading: Button("Back") {
+                        presentationMode.wrappedValue.dismiss()
+                    }
+                        .foregroundColor(Color("ColorOrange2")),
+                    trailing: Button("Save") {
+                        let newRecipe = Recipe(title: recipeTitle, description: recipeDescription, ingredients: ingredients)
+                        onSave(newRecipe) // Call the onSave closure
                         presentationMode.wrappedValue.dismiss() // Dismiss the view
                     }
-                    .foregroundColor(.orange),
-                    trailing: Button("Save") {
-                        saveRecipe() // Call save function
-                    }
-                    .foregroundColor(.orange)
+                        .foregroundColor(Color("ColorOrange2"))
                 )
             }
 
@@ -303,16 +333,10 @@ struct NewRecipeView: View {
             }
         }
     }
-
-    private func saveRecipe() {
-        // Perform the save action here
-        print("Recipe saved with title: \(recipeTitle), description: \(recipeDescription), ingredients: \(ingredients)")
-        presentationMode.wrappedValue.dismiss() // Dismiss the view after saving
-    }
 }
 
 struct NewRecipeView_Previews: PreviewProvider {
     static var previews: some View {
-        NewRecipeView()
+        NewRecipeView { _ in }
     }
 }

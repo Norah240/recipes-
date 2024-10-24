@@ -9,6 +9,7 @@ import SwiftUI
 
 struct ContentView: View {
     @State private var isShowingNewRecipeView = false // State variable for navigation
+    @State private var recipes: [Recipe] = [] // Store the list of recipes
 
     var body: some View {
         NavigationView {
@@ -19,10 +20,9 @@ struct ContentView: View {
                         .font(.largeTitle)
                         .fontWeight(.bold)
                         .padding()
-                        .frame(width: nil)
                     Spacer()
                     Button(action: {
-                        isShowingNewRecipeView = true // Set the state to show new recipe view
+                        isShowingNewRecipeView = true // Show NewRecipeView
                     }) {
                         Image(systemName: "plus")
                             .resizable()
@@ -38,33 +38,49 @@ struct ContentView: View {
 
                 Spacer()
 
-                // Center Icon and Text
-                VStack {
-                    Image(systemName: "fork.knife.circle")
-                        .resizable()
-                        .frame(width: 325.0, height: 327.0)
-                        .foregroundColor(Color(red: 0.985, green: 0.379, blue: 0.072))
-                    
-                    Text("There’s no recipe yet")
-                        .font(.title)
-                        .foregroundColor(.white)
-                        .fontWeight(.bold)
-                        .padding(.top, 20)
-                    
-                    Text("Please add your recipes")
-                        .font(.body)
-                        .foregroundColor(.gray)
-                        .padding(.top, 5)
-                        .frame(width: nil)
+                if recipes.isEmpty {
+                    // Show this if there are no recipes yet
+                    VStack {
+                        Image(systemName: "fork.knife.circle")
+                            .resizable()
+                            .frame(width: 325.0, height: 327.0)
+                            .foregroundColor(Color(red: 0.985, green: 0.379, blue: 0.072))
+                        
+                        Text("There’s no recipe yet")
+                            .font(.title)
+                            .foregroundColor(.white)
+                            .fontWeight(.bold)
+                            .padding(.top, 20)
+                        
+                        Text("Please add your recipes")
+                            .font(.body)
+                            .foregroundColor(.gray)
+                            .padding(.top, 5)
+                    }
+                } else {
+                    // List of saved recipes
+                    List(recipes) { recipe in
+                        VStack(alignment: .leading) {
+                            Text(recipe.title)
+                                .font(.headline)
+                                .foregroundColor(.white)
+                            Text(recipe.description)
+                                .font(.subheadline)
+                                .foregroundColor(.gray)
+                        }
+                        .listRowBackground(Color.black)
+                    }
+                    .listStyle(PlainListStyle())
                 }
 
                 Spacer()
             }
-            .background(Color.clear)
-            .navigationTitle("") // Set an empty navigation title
-            .navigationBarHidden(true) // Hide the navigation bar to keep UI clean
-            .sheet(isPresented: $isShowingNewRecipeView) { // Present NewRecipeView as a sheet
-                NewRecipeView()
+            .background(Color.black.edgesIgnoringSafeArea(.all))
+            .sheet(isPresented: $isShowingNewRecipeView) {
+                // Pass the closure to add a new recipe to the list
+                NewRecipeView { newRecipe in
+                    recipes.append(newRecipe)
+                }
             }
         }
     }
@@ -75,5 +91,3 @@ struct ContentView_Previews: PreviewProvider {
         ContentView()
     }
 }
-
-
