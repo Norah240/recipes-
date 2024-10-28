@@ -9,7 +9,7 @@ import PhotosUI
 
 // Recipe Model
 struct Recipe: Identifiable, Codable {
-    let id = UUID()
+    var id = UUID() // Make id mutable in case you want to decode an existing ID
     let title: String
     let description: String
     let ingredients: [Ingredient]
@@ -22,6 +22,7 @@ struct Recipe: Identifiable, Codable {
         return nil
     }
 }
+
 
 // Ingredient Model
 struct Ingredient: Identifiable, Codable {
@@ -201,84 +202,85 @@ struct NewRecipeView: View {
     var body: some View {
         ZStack {
             NavigationView {
-                VStack(alignment: .center, spacing: 20) {
-                    // Upload Photo Button
-                    Button(action: {
-                        showImagePicker = true
-                    }) {
-                        if let image = selectedImage {
-                            Image(uiImage: image)
-                                .resizable()
-                                .scaledToFit()
-                                .frame(width: 100, height: 100)
-                                .clipShape(RoundedRectangle(cornerRadius: 10))
-                        } else {
-                            VStack(alignment: .center, spacing: 20.0) {
-                                Image(systemName: "photo.badge.plus")
-                                    .resizable()
-                                    .frame(width: 80, height: 80)
-                                    .foregroundColor(Color("ColorOrange2"))
-                                Text("Upload Photo")
-                                    .foregroundColor(Color("ColorOrange2"))
-                                    .font(.headline)
-                            }
-                            .padding(.top, 90.0)
-                        }
-                    }
-                    .padding()
-                    .sheet(isPresented: $showImagePicker) {
-                        ImagePicker(selectedImage: $selectedImage)
-                    }
-                    
-                    // Title Field
-                    VStack(alignment: .leading) {
-                        Text("Title")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        TextField("Title", text: $recipeTitle)
-                            .padding()
-                            .background(Color.gray.opacity(0.15))
-                            .cornerRadius(8)
-                            .foregroundColor(.white)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Description Field
-                    VStack(alignment: .leading) {
-                        Text("Description")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                            .multilineTextAlignment(.leading)
-                        TextField("Description", text: $recipeDescription)
-                            .padding()
-                            .frame(height: 100.0)
-                            .background(Color.gray.opacity(0.15))
-                            .cornerRadius(8)
-                            .foregroundColor(.white)
-                    }
-                    .padding(.horizontal)
-                    
-                    // Add Ingredient Button
-                    HStack {
-                        Text("Add Ingredient")
-                            .font(.title)
-                            .fontWeight(.bold)
-                            .foregroundColor(.white)
-                        Spacer()
+                ScrollView { // Make the entire view scrollable
+                    VStack(alignment: .center, spacing: 20) {
+                        // Upload Photo Button
                         Button(action: {
-                            showIngredientPopup = true
+                            showImagePicker = true
                         }) {
-                            Image(systemName: "plus")
-                                .foregroundColor(Color("ColorOrange2"))
-                                .font(.title)
+                            if let image = selectedImage {
+                                Image(uiImage: image)
+                                    .resizable()
+                                    .padding()
+                                    .scaledToFit()
+                                    .frame(width: 400.0, height: 400.0)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                            } else {
+                                VStack(alignment: .center, spacing: 20.0) {
+                                    Image(systemName: "photo.badge.plus")
+                                        .resizable()
+                                        .frame(width: 80, height: 80)
+                                        .foregroundColor(Color("ColorOrange2"))
+                                    Text("Upload Photo")
+                                        .foregroundColor(Color("ColorOrange2"))
+                                        .font(.headline)
+                                }
+                                .padding(.top, 90.0)
+                            }
                         }
-                    }
-                    .padding(.horizontal)
-                    
-                    // Ingredient List
-                    List {
+                        .padding()
+                        .sheet(isPresented: $showImagePicker) {
+                            ImagePicker(selectedImage: $selectedImage)
+                        }
+                        
+                        // Title Field
+                        VStack(alignment: .leading) {
+                            Text("Title")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            TextField("Title", text: $recipeTitle)
+                                .padding()
+                                .background(Color.gray.opacity(0.15))
+                                .cornerRadius(8)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal)
+                        
+                        // Description Field
+                        VStack(alignment: .leading) {
+                            Text("Description")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                                .multilineTextAlignment(.leading)
+                            TextField("Description", text: $recipeDescription)
+                                .padding()
+                                .frame(height: 100.0)
+                                .background(Color.gray.opacity(0.15))
+                                .cornerRadius(8)
+                                .foregroundColor(.white)
+                        }
+                        .padding(.horizontal)
+                        
+                        // Add Ingredient Button
+                        HStack {
+                            Text("Add Ingredient")
+                                .font(.title)
+                                .fontWeight(.bold)
+                                .foregroundColor(.white)
+                            Spacer()
+                            Button(action: {
+                                showIngredientPopup = true
+                            }) {
+                                Image(systemName: "plus")
+                                    .foregroundColor(Color("ColorOrange2"))
+                                    .font(.title)
+                            }
+                        }
+                        .padding(.horizontal)
+                        
+                        // Ingredient List
                         ForEach(ingredients) { ingredient in
                             HStack {
                                 Text("\(ingredient.serving)")
@@ -305,26 +307,27 @@ struct NewRecipeView: View {
                             .background(Color.gray.opacity(0.2))
                             .cornerRadius(10)
                         }
+                        .padding(.horizontal)
+                        .frame(maxWidth: .infinity)
+                        
+                        Spacer()
                     }
-                    .listStyle(PlainListStyle())
-                    .frame(height: 200)
-                    Spacer()
+                    .padding()
+                    .background(Color.black)
+                    .navigationTitle("New Recipe")
+                    .navigationBarItems(
+                        leading: Button("Back") {
+                            presentationMode.wrappedValue.dismiss()
+                        }
+                        .foregroundColor(Color("ColorOrange2")),
+                        trailing: Button("Save") {
+                            let newRecipe = Recipe(title: recipeTitle, description: recipeDescription, ingredients: ingredients, imageData: selectedImage?.pngData())
+                            onSave(newRecipe) // Call the onSave closure
+                            presentationMode.wrappedValue.dismiss() // Dismiss the view
+                        }
+                        .foregroundColor(Color("ColorOrange2"))
+                    )
                 }
-                .padding()
-                .background(Color.black)
-                .navigationTitle("New Recipe")
-                .navigationBarItems(
-                    leading: Button("Back") {
-                        presentationMode.wrappedValue.dismiss()
-                    }
-                    .foregroundColor(Color("ColorOrange2")),
-                    trailing: Button("Save") {
-                        let newRecipe = Recipe(title: recipeTitle, description: recipeDescription, ingredients: ingredients, imageData: selectedImage?.pngData())
-                        onSave(newRecipe) // Call the onSave closure
-                        presentationMode.wrappedValue.dismiss() // Dismiss the view
-                    }
-                    .foregroundColor(Color("ColorOrange2"))
-                )
             }
 
             // Custom popup overlay
