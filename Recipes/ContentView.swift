@@ -92,20 +92,22 @@ struct RecipeCard: View {
 
     var body: some View {
         ZStack(alignment: .bottomLeading) {
-            Image("hallomi") // Replace with actual recipe image if available
-                .resizable()
-                .scaledToFill()
-                .frame(height: 250)
-                .cornerRadius(10)
-                .clipped()
-                .overlay(
-                    LinearGradient(
-                        gradient: Gradient(colors: [Color.black.opacity(0.7), Color.clear]),
-                        startPoint: .bottom,
-                        endPoint: .center
-                    )
+            if let image = recipe.image { // Assuming `image` is a property of `Recipe`
+                Image(uiImage: image)
+                    .resizable()
+                    .scaledToFill()
+                    .frame(height: 250)
                     .cornerRadius(10)
-                )
+                    .clipped()
+                    .overlay(
+                        LinearGradient(
+                            gradient: Gradient(colors: [Color.black.opacity(0.7), Color.clear]),
+                            startPoint: .bottom,
+                            endPoint: .center
+                        )
+                        .cornerRadius(10)
+                    )
+            }
 
             VStack(alignment: .leading, spacing: 6) {
                 Text(recipe.title)
