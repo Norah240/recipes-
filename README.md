@@ -1,4 +1,4 @@
-This SwiftUI Recipe Management App allows users to create,
+This SwiftUI Recipe App allows users to create,
 view, and manage their favorite recipes through a simple, intuitive interface. 
 The main screen (ContentView) displays a list of recipes as cards,
 each featuring the recipe title, description, and an optional image. 
